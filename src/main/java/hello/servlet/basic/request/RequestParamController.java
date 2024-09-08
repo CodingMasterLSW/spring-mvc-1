@@ -6,6 +6,8 @@ import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Slf4j
 @Controller
@@ -22,4 +24,89 @@ public class RequestParamController {
 
         response.getWriter().write("ok");
     }
+
+    /**
+     * @RequestParam 사용
+     * - 파라미터 이름으로 바인딩
+     * @ResponseBody 추가
+     * - View 조회를 무시하고 ,HTTP message body에 직접 해당 내용 입력
+     */
+
+    // Controller에서 return "ok"를 하면 ok이름을 가진 view를 찾음
+    // 즉 RestController가 필요
+    // RestController 사용하면 다 바뀌니 대신에
+    // @ResponseBody 를 사용할 수 있음
+    @ResponseBody
+    @RequestMapping("/request-param-v2")
+    public String requestParamV2(
+            @RequestParam("username") String memberName,
+            @RequestParam("age") int memberAge) {
+
+        log.info("username={}, age={}", memberName, memberAge);
+        return "ok";
+    }
+
+    /**
+     * @HTTP 파라미터 이름과 변수 이름이 같으면 @RequestParam(name="xx") 생략 가능
+     */
+    @ResponseBody
+    @RequestMapping("/request-param-v3")
+    public String requestParamV3(
+            @RequestParam String username,
+            @RequestParam int age) {
+
+        log.info("username={}, age={}", username, age);
+        return "ok";
+    }
+
+    /**
+     * @RequestParam 사용
+     * String, int 등의 단순 타입이면 @RequestParam도 생략 가능
+     */
+    @ResponseBody
+    @RequestMapping("/request-param-v4")
+    public String requestParamV4(String username, int age){
+        log.info("username={}, age={}", username, age);
+        return "ok";
+    }
+
+    /**
+     * @RequestParam.required
+     * /request-param-required -> username이 없으므로 예외
+     *
+     * 주의!
+     * /request-param-required?username= -> 빈문자로 통과
+     *
+     * 주의!
+     * /request-param-required
+     * int age -> null을 int에 입력하는 것은 불가능, 따라서 Integer 변경해야 함(또는 다음에 나오는
+    defaultValue 사용)
+     */
+    @ResponseBody
+    @RequestMapping("/request-param-required")
+    public String requestParamRequired(
+            @RequestParam(required = true) String username,
+            @RequestParam(required = false) Integer age){
+        log.info("username={}, age={}", username, age);
+        return "ok";
+    }
+
+    /**
+     * @RequestParam
+     * - defaultValue 사용
+     *
+     * 참고: defaultValue는 빈 문자의 경우에도 적용
+     * /request-param-default?username=
+     */
+
+    @ResponseBody
+    @RequestMapping("/request-param-default")
+    public String requestParamDefault(
+            @RequestParam(required = true, defaultValue = "guest") String username,
+            @RequestParam(required = true, defaultValue = "-1") int age){
+        log.info("username={}, age={}", username, age);
+        return "ok";
+    }
+
+
 }
